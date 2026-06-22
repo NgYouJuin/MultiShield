@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom/cjs/react-router-dom';
 
 const Home2 = () => (
     <div className='container' style={{ paddingBottom: '60px' }}>
-        <div className="jumbotron" id='homeJumbotron' style={{ marginTop: '50px', padding: '48px' }}>
+        <div className="jumbotron" id='homeJumbotron' style={{ marginTop: '90px', padding: '48px' }}>
             <span style={{
                 display: 'inline-block',
                 padding: '6px 14px',

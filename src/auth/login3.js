@@ -53,7 +53,7 @@ class Login3 extends Component {
         return (
             <section>
                 <div className="container">
-                    <div id='loginForm' style={{ marginTop: '70px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
+                    <div id='loginForm' style={{ marginTop: '90px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
                         <div className="ms-glass" style={{ padding: '36px' }}>
                             <div className="text-center mb-4">
                                 <div className="ms-logo" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

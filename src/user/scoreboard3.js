@@ -40,7 +40,7 @@ class Scoreboard extends Component {
         const currentUserId = isAuthenticated() && isAuthenticated().user && isAuthenticated().user.id;
 
         return (
-            <div className="container mt-4" style={{ paddingBottom: 60 }}>
+            <div className="container" style={{ marginTop: '90px', paddingBottom: 60 }}>
                 {/* Outer Glass Container matching Scoreboard3 colors */}
                 <div 
                     className="ms-glass p-4" 

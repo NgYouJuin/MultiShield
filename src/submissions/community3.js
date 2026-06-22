@@ -63,7 +63,7 @@ class Community3 extends Component {
 
         if (isLoading) {
             return (
-                <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "80vh" }}>
+                <div className="d-flex justify-content-center align-items-center" style={{marginTop: '90px', minHeight: "80vh" }}>
                     <div className="spinner-border text-primary" role="status" style={{ width: "3rem", height: "3rem" }}>
                         <span className="sr-only">Loading...</span>
                     </div>
@@ -72,7 +72,7 @@ class Community3 extends Component {
         }
 
         return (
-            <div className='container' style={{ marginTop: '40px', paddingBottom: 60 }}>
+            <div className='container' style={{ marginTop: '90px', paddingBottom: 60 }}>
                 <h3 style={{ fontWeight: 700, marginBottom: 6 }}>Community submissions</h3>
                 <p style={{ color: 'var(--ms-muted)', marginBottom: 24 }}>Vote on suspicious content reported by other shields.</p>
                 {this.renderList(sumbissions)}

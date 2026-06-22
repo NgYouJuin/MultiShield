@@ -87,7 +87,7 @@ class AddSubmissionPage3 extends Component {
         const { redirectToReferer, isDragging, isProcessing } = this.state;
         if (redirectToReferer) return <Redirect to="/" />
         return (
-            <div className="container mt-4" style={{ paddingBottom: 60 }}>
+            <div className="container" style={{ marginTop:'90px', paddingBottom: 60 }}>
                 <div className="ms-glass p-4" style={{ padding: '32px' }}>
                     <div className="mb-4">
                         <h3 style={{ fontWeight: 700, marginBottom: 4 }}>Report a potential scam</h3>

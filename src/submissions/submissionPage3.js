@@ -105,7 +105,7 @@ class SubmissionPage extends Component {
         }
 
         return (
-            <div className='container' style={{ marginTop: '40px', paddingBottom: 60 }}>
+            <div className='container' style={{ marginTop: '90px', paddingBottom: 60 }}>
                 <div className="card">
                     <div className="card-header" style={{ background: 'var(--ms-grad)', color: '#06122a', borderRadius: '18px 18px 0 0' }}>
                         <h4 style={{ marginBottom: 0, fontWeight: 700, color: '#06122a' }}>{submission.title}</h4>
