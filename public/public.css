@@ -1,0 +1,20 @@
+#homeJumbotron{
+    margin-top: 50px;
+}
+
+.special-row-col{
+    margin-bottom: 0px;
+}
+
+.file-container{
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center;     /* Centers vertically */
+    width: 100%;
+}
+
+.file-container input[type="file"] {
+  display: inline-block;
+  margin: 0 auto;
+  width: 203px;
+}
