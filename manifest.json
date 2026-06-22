@@ -1,0 +1,33 @@
+{
+    "manifest_version": 3,
+    "name": "MultiShield",
+    "version": "0.5",
+    "description": "The chrome extension for MultiShield.",
+    "permissions": [
+        "tabs",
+        "storage",
+        "activeTab",
+        "scripting"
+    ],
+    "host_permissions": [
+        "*://*/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": "MultiShield_logo.png"
+    },
+    "icons": {
+        "16": "MultiShield_logo.png",
+        "48": "MultiShield_logo.png",
+        "128": "MultiShield_logo.png"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["MultiShield_logo.png"],
+            "matches": ["*://*/*"]
+        }
+    ]
+}

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FlexHire SG — Remote & Flexible Jobs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --brand: #0057ff;
+      --brand-dark: #003bbf;
+      --ink: #111827;
+      --mid: #374151;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --surface: #f9fafb;
+      --white: #fff;
+      --green: #059669;
+      --green-bg: #ecfdf5;
+      --orange: #d97706;
+      --orange-bg: #fffbeb;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--surface); color: var(--ink); margin: 0; }
+
+    /* ── NAV ── */
+    .topnav {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .nav-brand { font-size: 1.2rem; font-weight: 800; color: var(--brand); }
+    .nav-links { display: flex; gap: 28px; align-items: center; }
+    .nav-links span { font-size: 0.85rem; color: var(--mid); font-weight: 500; cursor: default; }
+    .nav-links span:hover { color: var(--brand); }
+    .nav-cta { background: var(--brand); color: #fff; border-radius: 8px; padding: 7px 18px; font-size: 0.83rem; font-weight: 600; cursor: default; }
+
+    /* ── HERO SEARCH BAR ── */
+    .search-hero { background: var(--brand); padding: 40px 32px; }
+    .search-hero h1 { color: #fff; font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
+    .search-hero p { color: rgba(255,255,255,0.8); font-size: 0.95rem; margin-bottom: 20px; }
+    .search-bar { background: #fff; border-radius: 12px; display: flex; overflow: hidden; max-width: 700px; box-shadow: 0 4px 24px rgba(0,0,0,0.18); }
+    .search-bar input { border: none; outline: none; padding: 14px 20px; font-size: 0.9rem; flex: 1; color: var(--ink); }
+    .search-bar .search-btn { background: #f97316; color: #fff; border: none; padding: 14px 28px; font-weight: 700; font-size: 0.9rem; cursor: default; }
+    .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .filter-pill { background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.35); border-radius: 20px; padding: 5px 14px; font-size: 0.78rem; font-weight: 500; cursor: default; }
+    .filter-pill.active { background: #fff; color: var(--brand); }
+
+    /* ── LAYOUT ── */
+    .main { display: flex; max-width: 1140px; margin: 0 auto; padding: 28px 16px; gap: 24px; }
+
+    /* ── SIDEBAR FILTERS ── */
+    .filters { width: 240px; flex-shrink: 0; }
+    .filter-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .filter-card h6 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 14px; }
+    .filter-option { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: default; }
+    .filter-option input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--brand); cursor: default; }
+    .filter-option label { font-size: 0.84rem; color: var(--mid); display: flex; justify-content: space-between; width: 100%; cursor: default; }
+    .filter-option label .cnt { background: var(--surface); border-radius: 10px; padding: 1px 8px; font-size: 0.72rem; color: var(--muted); }
+
+    /* ── JOB LIST ── */
+    .job-list { flex: 1; }
+    .results-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .results-bar .count { font-size: 0.88rem; color: var(--muted); }
+    .sort-select { border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 0.83rem; color: var(--mid); background: var(--white); }
+
+    .job-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin-bottom: 14px;
+      cursor: default;
+      transition: box-shadow 0.2s, border-color 0.2s;
+      position: relative;
+    }
+    .job-card:hover { box-shadow: 0 4px 20px rgba(0,0,87,0.08); border-color: #c7d2fe; }
+    .job-card.featured { border-color: #a5b4fc; background: #fafbff; }
+    .featured-badge { position: absolute; top: 16px; right: 16px; background: #eef2ff; color: var(--brand); font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; padding: 3px 10px; border-radius: 20px; }
+    .hot-badge { position: absolute; top: 16px; right: 16px; background: #fee2e2; color: #dc2626; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; padding: 3px 10px; border-radius: 20px; }
+    .new-badge { position: absolute; top: 16px; right: 16px; background: var(--green-bg); color: var(--green); font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; padding: 3px 10px; border-radius: 20px; }
+
+    .company-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .company-logo {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.1rem; color: #fff; flex-shrink: 0;
+    }
+    .company-name { font-size: 0.82rem; color: var(--muted); }
+    .company-verified { font-size: 0.72rem; color: var(--green); font-weight: 600; }
+
+    .job-title { font-size: 1.05rem; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+    .job-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .job-tag { font-size: 0.75rem; background: var(--surface); border: 1px solid var(--border); color: var(--mid); border-radius: 6px; padding: 3px 10px; font-weight: 500; }
+    .job-tag.pay { background: var(--green-bg); color: var(--green); border-color: #a7f3d0; font-weight: 600; }
+    .job-tag.urgent { background: #fee2e2; color: #dc2626; border-color: #fca5a5; font-weight: 600; }
+    .job-tag.remote { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+
+    .job-desc { font-size: 0.85rem; color: var(--mid); line-height: 1.65; margin-bottom: 14px; }
+    .job-desc strong { color: var(--ink); }
+
+    .job-footer { display: flex; align-items: center; justify-content: space-between; }
+    .posted-time { font-size: 0.75rem; color: var(--muted); }
+    .apply-btn { background: var(--brand); color: #fff; border: none; border-radius: 8px; padding: 8px 20px; font-size: 0.83rem; font-weight: 600; cursor: default; }
+    .apply-btn.outline { background: transparent; color: var(--brand); border: 1.5px solid var(--brand); }
+
+    .job-requirements { font-size: 0.82rem; color: var(--mid); margin-top: 8px; }
+    .job-requirements span { display: inline-block; margin-right: 14px; }
+    .job-requirements span::before { content: '✓ '; color: var(--green); font-weight: 700; }
+
+    /* ALERT BANNER */
+    .alert-banner { background: var(--orange-bg); border: 1px solid #fcd34d; border-radius: 10px; padding: 12px 18px; margin-bottom: 16px; font-size: 0.83rem; color: var(--orange); display: flex; gap: 10px; align-items: flex-start; }
+
+    @media (max-width: 768px) {
+      .filters { display: none; }
+      .topnav .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="topnav">
+  <div class="nav-brand">⚡ FlexHire SG</div>
+  <div class="nav-links">
+    <span>Find Jobs</span>
+    <span>Companies</span>
+    <span>Salary Guide</span>
+    <span>Career Tips</span>
+    <div class="nav-cta">Post a Job</div>
+  </div>
+</nav>
+
+<!-- SEARCH HERO -->
+<div class="search-hero">
+  <h1>Find Flexible Work in Singapore</h1>
+  <p>Over 12,400 remote, part-time, and freelance opportunities updated daily.</p>
+  <div class="search-bar">
+    <input type="text" placeholder="Job title, keyword, or company" value="remote flexible">
+    <input type="text" placeholder="Location" value="Singapore" style="border-left:1px solid #e5e7eb; max-width:160px;">
+    <div class="search-btn">Search Jobs</div>
+  </div>
+  <div class="filter-pills">
+    <div class="filter-pill active">🏠 Remote</div>
+    <div class="filter-pill">Part-time</div>
+    <div class="filter-pill">Flexible Hours</div>
+    <div class="filter-pill">No Experience</div>
+    <div class="filter-pill">Daily Pay</div>
+    <div class="filter-pill">Immediate Start</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR FILTERS -->
+  <div class="filters">
+    <div class="filter-card">
+      <h6>Job Type</h6>
+      <div class="filter-option"><input type="checkbox" checked><label>Remote / WFH <span class="cnt">284</span></label></div>
+      <div class="filter-option"><input type="checkbox" checked><label>Part-time <span class="cnt">193</span></label></div>
+      <div class="filter-option"><input type="checkbox"><label>Full-time <span class="cnt">512</span></label></div>
+      <div class="filter-option"><input type="checkbox"><label>Contract <span class="cnt">88</span></label></div>
+    </div>
+    <div class="filter-card">
+      <h6>Salary (Monthly)</h6>
+      <div class="filter-option"><input type="checkbox" checked><label>SGD 2,000 – 4,000 <span class="cnt">147</span></label></div>
+      <div class="filter-option"><input type="checkbox" checked><label>SGD 4,000 – 6,000 <span class="cnt">98</span></label></div>
+      <div class="filter-option"><input type="checkbox"><label>SGD 6,000+ <span class="cnt">55</span></label></div>
+    </div>
+    <div class="filter-card">
+      <h6>Experience</h6>
+      <div class="filter-option"><input type="checkbox" checked><label>No experience needed <span class="cnt">62</span></label></div>
+      <div class="filter-option"><input type="checkbox"><label>Entry level <span class="cnt">134</span></label></div>
+      <div class="filter-option"><input type="checkbox"><label>Mid-level <span class="cnt">220</span></label></div>
+    </div>
+    <div class="filter-card">
+      <h6>Industry</h6>
+      <div class="filter-option"><input type="checkbox" checked><label>E-commerce <span class="cnt">74</span></label></div>
+      <div class="filter-option"><input type="checkbox" checked><label>Digital Marketing <span class="cnt">52</span></label></div>
+      <div class="filter-option"><input type="checkbox"><label>Admin / Data Entry <span class="cnt">88</span></label></div>
+      <div class="filter-option"><input type="checkbox"><label>Tech Support <span class="cnt">41</span></label></div>
+    </div>
+  </div>
+
+  <!-- JOB LISTINGS -->
+  <div class="job-list">
+
+    <div class="results-bar">
+      <div class="count">Showing <strong>127 jobs</strong> matching "remote flexible"</div>
+      <select class="sort-select"><option>Most Relevant</option><option>Newest</option><option>Highest Pay</option></select>
+    </div>
+
+    <div class="alert-banner">
+      ⚡ <span><strong>14 new jobs</strong> added in the last 2 hours. Scroll down to see the latest listings.</span>
+    </div>
+
+    <!-- JOB 1: Travel Booking Review -->
+    <div class="job-card featured">
+      <div class="featured-badge">⭐ FEATURED</div>
+      <div class="company-row">
+        <div class="company-logo" style="background:#4f46e5;">TR</div>
+        <div>
+          <div class="company-name">TravelRate Asia Pte Ltd</div>
+          <div class="company-verified">✔ Verified Employer</div>
+        </div>
+      </div>
+      <div class="job-title">Travel Booking Review Optimization Specialist</div>
+      <div class="job-meta">
+        <span class="job-tag pay">SGD 180 – 380/day</span>
+        <span class="job-tag remote">🏠 Work From Home</span>
+        <span class="job-tag">Flexible Hours</span>
+        <span class="job-tag">No Experience Required</span>
+      </div>
+      <div class="job-desc">
+        We are a fast-growing travel technology company seeking remote <strong>travel booking review optimization</strong> assistants. Your role involves completing and rating hotel and travel platform bookings to improve algorithmic rankings for our partner merchants.
+        <br><br>
+        You will be assigned daily tasks through our app. Each completed booking earns a fixed commission. <strong>No travel industry experience needed</strong> — full training provided via WhatsApp onboarding group.
+      </div>
+      <div class="job-requirements">
+        <span>Smartphone required</span>
+        <span>Min. 2 hrs/day</span>
+        <span>Daily payout available</span>
+      </div>
+      <div class="job-footer mt-3">
+        <div class="posted-time">⏱ Posted 18 minutes ago &nbsp;·&nbsp; 142 applied</div>
+        <div class="apply-btn">Apply Now</div>
+      </div>
+    </div>
+
+    <!-- JOB 2: Hotel Reservation Rating -->
+    <div class="job-card featured">
+      <div class="featured-badge">⭐ FEATURED</div>
+      <div class="company-row">
+        <div class="company-logo" style="background:#0891b2;">HR</div>
+        <div>
+          <div class="company-name">HotelBoost Global</div>
+          <div class="company-verified">✔ Verified Employer</div>
+        </div>
+      </div>
+      <div class="job-title">Hotel Reservation Rating Assistant — Remote (Singapore)</div>
+      <div class="job-meta">
+        <span class="job-tag pay">SGD 50 – 120 per task</span>
+        <span class="job-tag remote">🏠 Remote</span>
+        <span class="job-tag">Part-time</span>
+        <span class="job-tag urgent">🔥 Urgent Hire</span>
+      </div>
+      <div class="job-desc">
+        HotelBoost Global is hiring <strong>hotel reservation rating assistants</strong> to complete simulated bookings on major OTA platforms. Assistants improve hotel visibility scores through structured review cycles.
+        <br><br>
+        Tasks take 10–20 minutes each. You will receive task assignments daily and commissions are credited to your account within 24 hours. <strong>Immediate openings available — apply today to start this week.</strong>
+      </div>
+      <div class="job-requirements">
+        <span>No experience needed</span>
+        <span>Internet access</span>
+        <span>18 years and above</span>
+      </div>
+      <div class="job-footer mt-3">
+        <div class="posted-time">⏱ Posted 43 minutes ago &nbsp;·&nbsp; 89 applied</div>
+        <div class="apply-btn">Apply Now</div>
+      </div>
+    </div>
+
+    <!-- JOB 3: Virtual Receptionist -->
+    <div class="job-card">
+      <div class="new-badge">🟢 NEW</div>
+      <div class="company-row">
+        <div class="company-logo" style="background:#7c3aed;">VR</div>
+        <div>
+          <div class="company-name">VirtuOffice Solutions</div>
+          <div class="company-verified">✔ Verified Employer</div>
+        </div>
+      </div>
+      <div class="job-title">Virtual Receptionist — Flexible Shifts (WFH)</div>
+      <div class="job-meta">
+        <span class="job-tag pay">SGD 2,800 – 3,400/month</span>
+        <span class="job-tag remote">🏠 Fully Remote</span>
+        <span class="job-tag">Flexible Shifts</span>
+        <span class="job-tag">Part-time Available</span>
+      </div>
+      <div class="job-desc">
+        We are hiring <strong>virtual receptionists</strong> to handle inbound call routing, appointment scheduling, and client correspondence for our SME clients. <strong>Flexible shifts</strong> available — morning, afternoon, and evening blocks.
+        <br><br>
+        All equipment and training provided. You must have a quiet workspace and a reliable internet connection. Salary paid weekly to your registered bank account.
+      </div>
+      <div class="job-requirements">
+        <span>Good English communication</span>
+        <span>Own laptop</span>
+        <span>Flexible availability</span>
+      </div>
+      <div class="job-footer mt-3">
+        <div class="posted-time">⏱ Posted 1 hour ago &nbsp;·&nbsp; 56 applied</div>
+        <div class="apply-btn apply-btn outline">Apply Now</div>
+      </div>
+    </div>
+
+    <!-- JOB 4: Customer Service Chat Agent -->
+    <div class="job-card">
+      <div class="new-badge">🟢 NEW</div>
+      <div class="company-row">
+        <div class="company-logo" style="background:#059669;">CS</div>
+        <div>
+          <div class="company-name">NexServe Digital</div>
+          <div class="company-verified">✔ Verified Employer</div>
+        </div>
+      </div>
+      <div class="job-title">Customer Service Chat Agent — Remote (Immediate Start)</div>
+      <div class="job-meta">
+        <span class="job-tag pay">SGD 3,000 – 4,200/month</span>
+        <span class="job-tag remote">🏠 Remote</span>
+        <span class="job-tag urgent">🔥 Immediate</span>
+        <span class="job-tag">No Experience</span>
+      </div>
+      <div class="job-desc">
+        NexServe Digital is looking for a <strong>customer service chat agent (remote)</strong> to join our growing support team. You will handle live chats, process refund requests, and assist customers with order tracking via our internal dashboard.
+        <br><br>
+        No cold calling required — all interactions are via text chat. Full script and SOPs provided. <strong>Immediate start available for the right candidate.</strong>
+      </div>
+      <div class="job-requirements">
+        <span>Fast typing (40+ WPM)</span>
+        <span>Basic English</span>
+        <span>PC or Laptop</span>
+      </div>
+      <div class="job-footer mt-3">
+        <div class="posted-time">⏱ Posted 2 hours ago &nbsp;·&nbsp; 203 applied</div>
+        <div class="apply-btn apply-btn outline">Apply Now</div>
+      </div>
+    </div>
+
+    <!-- JOB 5: Data Validation Operator -->
+    <div class="job-card">
+      <div class="hot-badge">🔥 HOT</div>
+      <div class="company-row">
+        <div class="company-logo" style="background:#dc2626;">DV</div>
+        <div>
+          <div class="company-name">DataSync Pte Ltd</div>
+          <div class="company-verified">✔ Verified Employer</div>
+        </div>
+      </div>
+      <div class="job-title">Data Validation Operator — Urgent Vacancy</div>
+      <div class="job-meta">
+        <span class="job-tag pay">SGD 80 – 150/day</span>
+        <span class="job-tag remote">🏠 Home Based</span>
+        <span class="job-tag urgent">🔥 Urgent</span>
+        <span class="job-tag">Daily Pay</span>
+      </div>
+      <div class="job-desc">
+        We have an <strong>urgent</strong> opening for a <strong>data validation operator</strong> to help verify transaction records for our merchant clients. Tasks involve reviewing data sets and confirming entries using our proprietary validation platform.
+        <br><br>
+        Daily pay credited after each completed batch. <strong>Urgent start required — slots limited, apply immediately.</strong> WhatsApp HR at +65 9XXX XXXX for fastest response.
+      </div>
+      <div class="job-requirements">
+        <span>Attention to detail</span>
+        <span>Basic computer skills</span>
+        <span>Singapore resident</span>
+      </div>
+      <div class="job-footer mt-3">
+        <div class="posted-time">⏱ Posted 30 minutes ago &nbsp;·&nbsp; 311 applied</div>
+        <div class="apply-btn">Apply Now</div>
+      </div>
+    </div>
+
+    <!-- JOB 6: Ad Clicker / Social Media -->
+    <div class="job-card">
+      <div class="company-row">
+        <div class="company-logo" style="background:#f59e0b;">SM</div>
+        <div>
+          <div class="company-name">SocialBoost Media</div>
+          <div class="company-verified">✔ Verified Employer</div>
+        </div>
+      </div>
+      <div class="job-title">Social Media Manager — No Experience Required</div>
+      <div class="job-meta">
+        <span class="job-tag pay">SGD 200 – 500/week</span>
+        <span class="job-tag remote">🏠 Remote</span>
+        <span class="job-tag">No Experience</span>
+        <span class="job-tag">Instagram / TikTok</span>
+      </div>
+      <div class="job-desc">
+        <strong>No experience needed!</strong> SocialBoost Media is recruiting <strong>social media managers</strong> and <strong>Instagram influencer coordinator</strong> assistants to help grow our clients' online presence. Tasks include scheduling posts, engaging with followers, and participating in our <strong>ad clicker revenue sharing</strong> programme.
+        <br><br>
+        Earn a <strong>revenue share</strong> on every qualified click your assigned content generates. Payments processed weekly via PayNow or bank transfer.
+      </div>
+      <div class="job-requirements">
+        <span>Active social media user</span>
+        <span>Min. 1 hr/day</span>
+        <span>Smartphone</span>
+      </div>
+      <div class="job-footer mt-3">
+        <div class="posted-time">⏱ Posted 3 hours ago &nbsp;·&nbsp; 174 applied</div>
+        <div class="apply-btn apply-btn outline">Apply Now</div>
+      </div>
+    </div>
+
+    <!-- JOB 7: Cloud Storage Auditor / Online Survey -->
+    <div class="job-card">
+      <div class="company-row">
+        <div class="company-logo" style="background:#0284c7;">CA</div>
+        <div>
+          <div class="company-name">CloudAudit Partners</div>
+          <div class="company-verified">✔ Verified Employer</div>
+        </div>
+      </div>
+      <div class="job-title">Cloud Storage Auditor / Online Survey Coordinator — Home Based</div>
+      <div class="job-meta">
+        <span class="job-tag pay">SGD 3,500 – 5,000/month</span>
+        <span class="job-tag remote">🏠 Home Based</span>
+        <span class="job-tag">Part-time / Full-time</span>
+      </div>
+      <div class="job-desc">
+        We are hiring for two <strong>home based</strong> roles: (1) <strong>Cloud Storage Auditor</strong> — reviewing storage utilisation reports and flagging anomalies, and (2) <strong>Online Survey Coordinator</strong> with a competitive <strong>salary</strong> package — managing survey distribution and collating responses for our research clients.
+        <br><br>
+        Both roles are fully remote. Laptop and system access provided on your first day. <strong>Competitive salary with performance bonuses.</strong>
+      </div>
+      <div class="job-requirements">
+        <span>Basic IT literacy</span>
+        <span>Organised and detail-oriented</span>
+        <span>Reliable internet</span>
+      </div>
+      <div class="job-footer mt-3">
+        <div class="posted-time">⏱ Posted 5 hours ago &nbsp;·&nbsp; 92 applied</div>
+        <div class="apply-btn apply-btn outline">Apply Now</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer style="background:#111827; color:#6b7280; padding: 40px 32px 28px; margin-top: 40px;">
+  <div style="max-width:1140px; margin:0 auto; display:flex; justify-content:space-between; flex-wrap:wrap; gap:20px;">
+    <div>
+      <div style="color:#fff; font-weight:800; font-size:1.1rem; margin-bottom:6px;">⚡ FlexHire SG</div>
+      <div style="font-size:0.8rem;">Singapore's flexible jobs marketplace.</div>
+    </div>
+    <div style="display:flex; gap:32px; font-size:0.82rem;">
+      <div><div style="color:#fff;font-weight:600;margin-bottom:8px;">Job Seekers</div><div>Browse Jobs</div><div style="margin-top:4px;">Career Resources</div></div>
+      <div><div style="color:#fff;font-weight:600;margin-bottom:8px;">Employers</div><div>Post a Job</div><div style="margin-top:4px;">Talent Search</div></div>
+      <div><div style="color:#fff;font-weight:600;margin-bottom:8px;">Support</div><div>Help Centre</div><div style="margin-top:4px;">Contact Us</div></div>
+    </div>
+  </div>
+  <div style="max-width:1140px; margin: 24px auto 0; border-top:1px solid rgba(255,255,255,0.08); padding-top:20px; font-size:0.75rem;">
+    © 2025 FlexHire SG Pte Ltd · UEN: 202XXXXXX · All listings are provided by third-party employers. FlexHire SG does not verify the accuracy of job postings.
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

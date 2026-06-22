@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { width: 750px; min-height: 600px; text-align: center; font-family: Arial, sans-serif; }
+        .pt-0 { padding-top: 0 !important; }
+        /* Base Reset & Core Layout */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+        /* Container Box */
+        .tab-wrapper {
+            width: 100%;
+            /* max-width: 640px; */
+            height: 100%;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 
+                        0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+        /* Navigation Bar Container */
+        .tab-nav {
+            display: flex;
+            background-color: #f1f5f9;
+            padding: 6px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        /* Tab Buttons with Interactive Touch/Click Targets */
+        .tab-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            outline: none;
+            -webkit-tap-highlight-color: transparent; /* Prevents gray tap highlight on mobile */
+        }
+        /* Hover effect for non-active states */
+        .tab-btn:hover:not(.active) {
+            color: #0f172a;
+            background-color: #e2e8f0;
+        }
+        /* Focus States for Keyboard Accessibility */
+        .tab-btn:focus-visible {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+        }
+        /* Dynamic Highlight Style for Active Tab */
+        .tab-btn.active {
+            background-color: #ffffff;
+            color: #4f46e5;
+            box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.12), 
+                        0 2px 4px -1px rgba(79, 70, 229, 0.08);
+        }
+        /* Content Area Frame */
+        .tab-viewport {
+            position: relative;
+        }
+        /* Panels Layout with CSS Transition animations */
+        .tab-panel {
+            padding: 32px;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        /* Visible State Helper */
+        .tab-panel.active {
+            display: block;
+        }
+        /* Rich content element stylings */
+        .tab-panel h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 12px;
+        }
+        .tab-panel p {
+            font-size: 15px;
+            line-height: 1.625;
+            color: #475569;
+        }
+        /* Interactive button built inside the panels to test touch/click response */
+        .panel-action-btn {
+            margin-top: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            background-color: #4f46e5;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .panel-action-btn:hover {
+            background-color: #4338ca;
+        }
+        /* Keyframe Animations */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Adaptive Layout adjustments on smaller viewport frames */
+        @media (max-width: 480px) {
+            .tab-panel {
+                padding: 24px 16px;
+            }
+            .tab-panel h2 {
+                font-size: 20px;
+            }
+        }
+
+        /* Viewport containing tab panels */
+        .tab-viewport {
+            padding: 15px;
+            position: relative;
+        }
+
+        /* Panels Layout with animations and initial hidden state */
+        .tab-panel {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Visible State Helper with Animation */
+        .tab-panel.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+        /* Custom Styling for New Alerts Panel Elements */
+        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+        /* [1] Threat Meter Bar (Image 0) */
+        .threat-meter-container {
+            width: 100%;
+            height: 30px;
+            background-color: #e2e8f0; /* Light grey track */
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            position: relative;
+            border: 1px solid #aaa;
+        }
+        .threat-meter-fill {
+            position: absolute;
+            height: 100%;
+            background-color: #e53e3e; /* Solid red bar */
+            width: 85%; /* The visual fill */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: width 0.3s ease;
+        }
+        .threat-meter-text {
+            position: absolute;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: black; /* text centered in the solid red part */
+            line-height: 30px;
+        }
+        /* Threat Message Text */
+        .threat-message {
+            font-size: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .threat-message strong.scam {
+            color: #e53e3e;
+            font-weight: 700;
+        }
+        .threat-message strong.safe {
+            color: limegreen;
+            font-weight: 700;
+        }
+        .display-none {
+            display: none;
+        }
+
+        /* Keyword Title */
+        .keywords-title {
+            font-size: 15px;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        /* [2] Copyable, Read-only Textbox (Image 0) */
+        .keywords-textbox {
+            width: 100%;
+            height: 120px; /* Match height of a text box */
+            background-color: #f7fafc;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #2d3748;
+            resize: none; /* User cannot resize */
+            outline: none; /* Remove focus ring for better appearance */
+            cursor: text; /* Still shows text cursor, hinting copyable */
+            margin-bottom: 15px;
+        }
+        /* Making it feel read-only on focus */
+        .keywords-textbox:focus {
+            background-color: #edf2f7;
+        }
+
+        /* [3] Alternating-Shade Keyword Table (Image 1) */
+        .keywords-table-container {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .analysis-table thead {
+            background-color: #718096; /* Darker grey header */
+            color: white;
+        }
+        .analysis-table th, .analysis-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #cbd5e0;
+        }
+        /* Header text should be clear */
+        .analysis-table th {
+            font-weight: 700;
+        }
+        /* Alternate Row Shading */
+        .analysis-table tbody tr:nth-child(even) {
+            background-color: #edf2f7; /* Very light grey */
+        }
+        .analysis-table tbody tr:nth-child(odd) {
+            background-color: white;
+        }
+        /* Styling for links in the table */
+        .analysis-table td.scam-type a {
+            color: #3182ce;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .analysis-table td.scam-type a:hover {
+            text-decoration: underline;
+        }
+        /* detailed analysis box with links above the table */
+        .analysis-box {
+            border: 1px solid #f6e05e; /* Yellow from mockup 1 */
+            background-color: #fffaf0; /* Very light yellow tint */
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none; /* Keep hidden by default */
+        }
+        .analysis-box p {
+            font-size: 14px;
+            color: #666;
+        }
+        .analysis-box a {
+            color: #3182ce;
+            text-decoration: none;
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+        .analysis-box a:hover {
+            text-decoration: underline;
+        }
+
+        /* [4] Special Upward-Dropped Button (Image 1) */
+        .download-dropdown-container {
+            margin-top: 15px;
+            width: 100%;
+            position: relative; /* Essential for upward positioning of menu */
+        }
+        .download-button-group {
+            display: flex;
+            width: 100%;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #aaa;
+        }
+        /* Main "Download" button */
+        .download-main-btn {
+            flex-grow: 1;
+            border: none;
+            background-color: #f6e05e; /* Gold/Yellow from mockup */
+            color: #2d3748;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        .download-main-btn:hover {
+            background-color: #ecc94b;
+        }
+        /* The distinct "Tip" on the side (Image 1 shows an area with the tip arrow) */
+        .download-tip-btn {
+            width: 40px;
+            border: none;
+            border-left: 1px solid #aaa;
+            background-color: #cbd5e0; /* Grey area from mockup 1 */
+            color: #718096;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        .download-tip-btn:hover {
+            background-color: #a0aec0;
+        }
+        /* The hidden Dropdown Menu that drops **UPWARDS** */
+        .download-dropdown-content {
+            display: none;
+            position: absolute;
+            bottom: 100%; /* Important: Positions above the button group */
+            right: 0; /* Aligns to the right edge */
+            width: auto;
+            min-width: 150px;
+            background-color: white;
+            border-radius: 6px 6px 0 0; /* Match upward flow: no bottom rounded corner */
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.15);
+            border: 1px solid #aaa;
+            overflow: hidden;
+            margin-bottom: 5px; /* Spacing */
+            z-index: 100; /* Ensure it stays above everything */
+        }
+        /* State helper for upward visibility */
+        .download-dropdown-content.visible {
+            display: block;
+        }
+
+        /* Standard downward dropdown content in popup */
+        .dropdown-content {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            display: none;
+        }
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        .dropdown-content a:hover {background-color: #f1f1f1}
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Styling for dropdown menu links */
+        .dropdown-link > svg {
+            vertical-align: bottom;
+        }
+        .dropdown-link {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 14px;
+            border-bottom: 1px solid #eee;
+        }
+        .dropdown-link:hover {
+            background-color: #e2e8f0;
+        }
+        .dropdown-link:last-child {
+            border-bottom: none;
+        }
+
+        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+        /* Custom Styling for Settings Panel Layout     */
+        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+        .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .settings-group {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 14px;
+        }
+        
+        .settings-group:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .settings-group-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+        
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .settings-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .settings-info {
+            flex-grow: 1;
+        }
+        
+        .settings-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            display: block;
+        }
+        
+        .settings-description {
+            font-size: 11px;
+            color: #718096;
+            margin-top: 2px;
+            line-height: 1.3;
+        }
+        
+        /* Toggle Switch Component */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e0;
+            transition: .25s ease;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .25s ease;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #e53e3e; /* Accent red matching active tab status */
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        
+        /* Input Dropdowns and Text controls */
+        .settings-select {
+            padding: 6px 10px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e0;
+            background-color: #fff;
+            color: #2d3748;
+            outline: none;
+            cursor: pointer;
+            width: 130px;
+            transition: border-color 0.2s;
+        }
+        
+        .settings-input {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e0;
+            background-color: #fff;
+            color: #2d3748;
+            outline: none;
+            margin-top: 6px;
+            transition: border-color 0.2s;
+        }
+        
+        .settings-input:focus, .settings-select:focus {
+            border-color: #a0aec0;
+        }
+
+        /* Action Buttons in Options Pane */
+        .settings-action-row {
+            margin-top: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .settings-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .settings-btn.save {
+            background-color: #e53e3e;
+            color: white;
+            border-color: #e53e3e;
+        }
+        
+        .settings-btn.save:hover {
+            background-color: #c53030;
+        }
+
+        .settings-btn.reset {
+            background-color: white;
+            color: #4a5568;
+        }
+
+        .settings-btn.reset:hover {
+            background-color: #f7fafc;
+        }
+
+        .unusable-paragraph {
+            color: #888888;          /* Faded grey text */
+            opacity: 0.5;            /* Makes the text look washed out */
+            cursor: not-allowed;     /* Changes the mouse pointer to a 'no' symbol */
+            pointer-events: none;    /* Prevents the user from highlighting or clicking it */
+        }
+    </style>
+</head>
+<body>
+    <!-- <h3>Hello!</h3>
+    <button id="clickMe">Click Me</button> -->
+    <div class="tab-wrapper">
+        <!-- Tab Controls Section -->
+        <div class="tab-nav" role="tablist" aria-label="Toggleable Content Tabs">
+            <button 
+                id="tab-control-alerts"
+                class="tab-btn active" 
+                role="tab" 
+                aria-selected="true" 
+                aria-controls="panel-1">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Overview
+            </button>
+            <button 
+                id="tab-control-settings"
+                class="tab-btn" 
+                role="tab" 
+                aria-selected="false" 
+                aria-controls="panel-2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Settings
+            </button>
+        </div>
+
+        <!-- Viewport containing tab panels -->
+        <div class="tab-viewport">
+
+            <!-- [A] Alerts Panel Section (from context, populated with new elements) -->
+            <section 
+                id="alerts-panel" 
+                class="tab-panel pt-0 active" 
+                role="tabpanel" 
+                aria-labelledby="tab-control-alerts">
+                <img src="MultiShield_logo_text.png" alt="" height="80px"></img>
+                <!-- [1] Meter Bar (Image 0) -->
+                <div class="threat-meter-container">
+                    <div id="ui-threat-meter-fill" class="threat-meter-fill"></div>
+                    <span id="ui-threat-meter-text" class="threat-meter-text"></span>
+                </div>
+                <!-- Scam Message Text -->
+                <p id="ui-threat-message-label" class="threat-message">This page is likely a <strong class="scam">scam</strong>!</p>
+                <!-- Keywords Paragraph Title -->
+                <p id="matched-keywords-count-label" class="keywords-title">Matched Keywords: </p>
+                <!-- [2] Read-only, Copyable Textbox (Image 0) -->
+                <textarea id="keywords-box" class="keywords-textbox" readonly></textarea>
+                <!-- Title for Detailed Table Analysis -->
+                <p class="keywords-title">Detailed Keyword Breakdown:</p>
+                <!-- detailed analysis box above the table -->
+                <div class="keywords-table-container">
+                    <table class="analysis-table">
+                        <thead>
+                        <tr>
+                            <th>keyword</th>
+                            <th>Scam Type</th>
+                        </tr>
+                        </thead>
+                        <tbody id="popup-analysis-table-body">
+                        <!-- Dynamically populated from script loop to prevent HTML bloat -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- [4] Upward Dropdown Button Group (Image 1) -->
+                <div class="download-dropdown-container">
+                <div class="download-button-group">
+                    <button id="btn-download-main" class="download-main-btn">Download Full Report</button>
+                    <button id="btn-download-tip" class="download-tip-btn">
+                        <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M297.4 169.4C309.9 156.9 330.2 156.9 342.7 169.4L534.7 361.4C547.2 373.9 547.2 394.2 534.7 406.7C522.2 419.2 501.9 419.2 489.4 406.7L320 237.3L150.6 406.6C138.1 419.1 117.8 419.1 105.3 406.6C92.8 394.1 92.8 373.8 105.3 361.3L297.3 169.3z"/></svg>
+                    </button>
+                </div>
+                <!-- Hidden Menu that drops **UPWARDS** -->
+                <div id="download-dropdown-menu" class="download-dropdown-content">
+                    <a id="menu-download-pdf" href="#" class="dropdown-link">as PDF
+                        <svg width="18" height="18"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M128 64C92.7 64 64 92.7 64 128L64 512C64 547.3 92.7 576 128 576L208 576L208 464C208 428.7 236.7 400 272 400L448 400L448 234.5C448 217.5 441.3 201.2 429.3 189.2L322.7 82.7C310.7 70.7 294.5 64 277.5 64L128 64zM389.5 240L296 240C282.7 240 272 229.3 272 216L272 122.5L389.5 240zM272 444C261 444 252 453 252 464L252 592C252 603 261 612 272 612C283 612 292 603 292 592L292 564L304 564C337.1 564 364 537.1 364 504C364 470.9 337.1 444 304 444L272 444zM304 524L292 524L292 484L304 484C315 484 324 493 324 504C324 515 315 524 304 524zM400 444C389 444 380 453 380 464L380 592C380 603 389 612 400 612L432 612C460.7 612 484 588.7 484 560L484 496C484 467.3 460.7 444 432 444L400 444zM420 572L420 484L432 484C438.6 484 444 489.4 444 496L444 560C444 566.6 438.6 572 432 572L420 572zM508 464L508 592C508 603 517 612 528 612C539 612 548 603 548 592L548 548L576 548C587 548 596 539 596 528C596 517 587 508 576 508L548 508L548 484L576 484C587 484 596 475 596 464C596 453 587 444 576 444L528 444C517 444 508 453 508 464z"/></svg>
+                    </a>
+                    <a id="menu-download-txt" href="#" class="dropdown-link">as TXT
+                        <svg width="18" height="18"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M192 112L304 112L304 200C304 239.8 336.2 272 376 272L464 272L464 512C464 520.8 456.8 528 448 528L192 528C183.2 528 176 520.8 176 512L176 128C176 119.2 183.2 112 192 112zM352 131.9L444.1 224L376 224C362.7 224 352 213.3 352 200L352 131.9zM192 64C156.7 64 128 92.7 128 128L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 250.5C512 233.5 505.3 217.2 493.3 205.2L370.7 82.7C358.7 70.7 342.5 64 325.5 64L192 64zM248 320C234.7 320 224 330.7 224 344C224 357.3 234.7 368 248 368L392 368C405.3 368 416 357.3 416 344C416 330.7 405.3 320 392 320L248 320zM248 416C234.7 416 224 426.7 224 440C224 453.3 234.7 464 248 464L392 464C405.3 464 416 453.3 416 440C416 426.7 405.3 416 392 416L248 416z"/></svg>
+                    </a>
+                </div>
+                </div>
+            </section>
+
+            <!-- [B] Settings Panel Section -->
+            <section 
+                id="settings-panel" 
+                class="tab-panel" 
+                role="tabpanel" 
+                aria-labelledby="tab-control-settings">
+                <div class="settings-list">
+          
+                    <!-- Section Group 1: Scanning System -->
+                    <div class="settings-group">
+                        <div class="settings-group-title unusable-paragraph">Protection Engine (future development)</div>
+                        
+                        <!-- Row 1: Real-time scan -->
+                        <div class="settings-row unusable-paragraph">
+                            <div class="settings-info">
+                                <label class="settings-label">AI Scanning</label>
+                                <span class="settings-description">Swap to AI scanning instead of pattern-matching.</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="set-realtime-scan" disabled>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- Row 2: Deep Link Check -->
+                        <div class="settings-row unusable-paragraph">
+                            <div class="settings-info">
+                                <label class="settings-label">Deep URL Heuristics</label>
+                                <span class="settings-description">Verify hidden redirects and subdomain impersonations.</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="set-deep-heuristics" disabled>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Section Group 2: Threshold Tuning -->
+                    <div class="settings-group">
+                        <div class="settings-group-title">Heuristics Tuning</div>
+                        
+                        <!-- Row 1: Dropdown Selection -->
+                        <div class="settings-row">
+                        <div class="settings-info">
+                            <label class="settings-label">Risk Sensitivity</label>
+                            <span class="settings-description">Control flagging logic aggressiveness.</span>
+                        </div>
+                        <select id="set-risk-sensitivity" class="settings-select">
+                            <option value="low">Low (Passive)</option>
+                            <option value="medium" selected>Balanced</option>
+                            <option value="high">High (Strict)</option>
+                        </select>
+                        </div>
+                    </div>
+
+                    <!-- Section Group 3: Exclusions / Domains -->
+                    <div class="settings-group">
+                        <div class="settings-group-title">Allowed Lists</div>
+                        
+                        <!-- Row 1: Whitelist Entry -->
+                        <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                        <div class="settings-info">
+                            <label class="settings-label">Safe Domains Exception list</label>
+                            <span class="settings-description">Bypass checking entirely on these domains (comma-separated).</span>
+                        </div>
+                        <input type="text" id="set-safe-domains" class="settings-input" value="google.com, github.com, supabase.com">
+                        </div>
+                    </div>
+
+                    <!-- Bottom Save Actions -->
+                    <div class="settings-action-row">
+                        <button id="btn-settings-reset" class="settings-btn reset">Reset Defaults</button>
+                        <button id="btn-settings-save" class="settings-btn save">Save Preferences</button>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+    </div>
+    </div>
+    <!-- Link to our actual script -->
+    <script src="popup.js"></script>
+</body>
+</html>

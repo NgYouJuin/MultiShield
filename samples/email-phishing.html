@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MyMail — Inbox</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f0f2f5; margin: 0; min-height: 100vh; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-brand { font-size: 1.25rem; font-weight: 700; color: #1a73e8; letter-spacing: -0.5px; }
+    .topbar-search {
+      flex: 0 1 480px;
+      background: #f1f3f4;
+      border: none;
+      border-radius: 24px;
+      padding: 8px 20px;
+      font-size: 0.875rem;
+      color: #444;
+      outline: none;
+    }
+    .topbar-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: #1a73e8;
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 600;
+    }
+
+    /* ── LAYOUT ── */
+    .app-layout { display: flex; min-height: calc(100vh - 56px); }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      background: #fff;
+      border-right: 1px solid #e8eaed;
+      padding: 12px 8px;
+      flex-shrink: 0;
+    }
+    .compose-btn {
+      background: #c2e7ff;
+      border: none;
+      border-radius: 20px;
+      padding: 14px 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #001d35;
+      display: flex; gap: 10px; align-items: center;
+      width: 100%;
+      margin-bottom: 8px;
+      cursor: default;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 14px;
+      border-radius: 0 20px 20px 0;
+      font-size: 0.85rem;
+      color: #444;
+      cursor: default;
+    }
+    .nav-item.active { background: #d3e3fd; font-weight: 600; color: #001d35; }
+    .nav-item .count { margin-left: auto; font-size: 0.78rem; font-weight: 600; color: #444; }
+
+    /* ── EMAIL LIST ── */
+    .email-list { width: 340px; border-right: 1px solid #e8eaed; background: #fff; overflow-y: auto; flex-shrink: 0; }
+    .list-header { padding: 14px 16px 10px; font-size: 1rem; font-weight: 600; color: #202124; border-bottom: 1px solid #f0f0f0; }
+    .email-row {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: default;
+      transition: background 0.15s;
+    }
+    .email-row:hover { background: #f5f5f5; }
+    .email-row.unread { background: #fff; }
+    .email-row.unread .sender { font-weight: 700; color: #202124; }
+    .email-row.unread .subject { font-weight: 700; color: #202124; }
+    .email-row.read .sender { font-weight: 400; color: #5f6368; }
+    .email-row.selected { background: #e8f0fe; }
+    .email-row .sender { font-size: 0.83rem; margin-bottom: 2px; }
+    .email-row .subject { font-size: 0.8rem; color: #202124; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .email-row .preview { font-size: 0.75rem; color: #5f6368; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .email-row .meta { display: flex; justify-content: space-between; align-items: flex-start; }
+    .email-row .time { font-size: 0.72rem; color: #5f6368; flex-shrink: 0; margin-left: 8px; }
+    .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a73e8; display: inline-block; margin-right: 6px; flex-shrink: 0; }
+
+    /* ── EMAIL VIEWER ── */
+    .email-viewer { flex: 1; padding: 32px 40px; overflow-y: auto; background: #fff; }
+    .email-subject-line { font-size: 1.5rem; font-weight: 700; color: #202124; margin-bottom: 20px; }
+    .email-meta { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid #e8eaed; }
+    .sender-avatar { width: 40px; height: 40px; border-radius: 50%; background: #fbbc04; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; color: #fff; flex-shrink: 0; }
+    .sender-avatar.green { background: #34a853; }
+    .sender-avatar.red { background: #ea4335; }
+    .sender-avatar.blue { background: #4285f4; }
+    .meta-text .name { font-size: 0.9rem; font-weight: 600; color: #202124; }
+    .meta-text .address { font-size: 0.78rem; color: #5f6368; }
+    .meta-text .to { font-size: 0.78rem; color: #5f6368; margin-top: 2px; }
+    .meta-right { margin-left: auto; font-size: 0.75rem; color: #5f6368; white-space: nowrap; }
+
+    /* ── EMAIL BODY ── */
+    .email-body { font-size: 0.9rem; line-height: 1.75; color: #202124; max-width: 680px; }
+    .email-body p { margin-bottom: 14px; }
+    .email-body .highlight { background: #fff3cd; padding: 1px 4px; border-radius: 3px; }
+    .official-box {
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 24px 0;
+      background: #f8f9fa;
+    }
+    .official-box .logo-bar { font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #5f6368; margin-bottom: 12px; }
+    .official-box .ref { font-size: 0.78rem; color: #5f6368; margin-bottom: 8px; }
+    .official-box .big-text { font-size: 1rem; font-weight: 700; color: #202124; margin-bottom: 6px; }
+    .official-box .detail { font-size: 0.83rem; color: #444; }
+
+    .fake-btn {
+      display: inline-block;
+      background: #1a73e8;
+      color: #fff;
+      border-radius: 6px;
+      padding: 10px 24px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin: 16px 0;
+      cursor: default;
+      user-select: none;
+    }
+    .fake-btn.red { background: #ea4335; }
+    .fake-btn.green { background: #188038; }
+
+    .divider-tab { height: 1px; background: #e8eaed; margin: 28px 0; }
+
+    /* Tabs to switch emails */
+    .email-tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+    .email-tab {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #dadce0;
+      background: #fff;
+      color: #444;
+      transition: background 0.15s;
+    }
+    .email-tab.active { background: #d3e3fd; border-color: #d3e3fd; color: #001d35; font-weight: 600; }
+
+    /* email panels */
+    .email-panel { display: none; }
+    .email-panel.active { display: block; }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .email-list { width: 260px; }
+    }
+    @media (max-width: 640px) {
+      .email-list { display: none; }
+      .email-viewer { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">✉ MyMail</div>
+  <input class="topbar-search" type="text" placeholder="Search mail" value="">
+  <div class="d-flex align-items-center gap-3">
+    <span style="font-size:0.75rem;color:#5f6368;">1 of 2,847</span>
+    <div class="topbar-avatar">TL</div>
+  </div>
+</div>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="compose-btn">✏ Compose</div>
+    <div class="nav-item active">📥 Inbox <span class="count">14</span></div>
+    <div class="nav-item">⭐ Starred</div>
+    <div class="nav-item">🕐 Snoozed</div>
+    <div class="nav-item">📤 Sent</div>
+    <div class="nav-item">📝 Drafts <span class="count">3</span></div>
+    <div class="nav-item">🏷 More</div>
+    <hr style="border-color:#e8eaed; margin: 12px 0;">
+    <div style="padding: 8px 14px; font-size: 0.73rem; font-weight: 600; color: #5f6368; letter-spacing: 1px; text-transform: uppercase;">Labels</div>
+    <div class="nav-item">🔵 Finance</div>
+    <div class="nav-item">🟢 Work</div>
+    <div class="nav-item">🔴 Urgent</div>
+  </div>
+
+  <!-- EMAIL LIST -->
+  <div class="email-list">
+    <div class="list-header">Inbox</div>
+
+    <div class="email-row unread selected" onclick="showEmail('email1')">
+      <div class="meta">
+        <div class="sender"><span class="unread-dot"></span>DBS Security Team</div>
+        <div class="time">10:42 AM</div>
+      </div>
+      <div class="subject">Unauthorized Transaction Alert — Action Required</div>
+      <div class="preview">Your account has been flagged. Verify identity to avoid immediate suspension...</div>
+    </div>
+
+    <div class="email-row unread" onclick="showEmail('email2')">
+      <div class="meta">
+        <div class="sender"><span class="unread-dot"></span>IRAS Singapore</div>
+        <div class="time">9:14 AM</div>
+      </div>
+      <div class="subject">IRAS Tax Refund Confirmation — SGD 847.00 Pending</div>
+      <div class="preview">Your tax refund has been approved. CPF payout verification required before...</div>
+    </div>
+
+    <div class="email-row unread" onclick="showEmail('email3')">
+      <div class="meta">
+        <div class="sender"><span class="unread-dot"></span>SingPost Delivery</div>
+        <div class="time">8:57 AM</div>
+      </div>
+      <div class="subject">Singapore Post Delivery Update Required</div>
+      <div class="preview">Your parcel is on hold. Advance payment for priority delivery needed to release...</div>
+    </div>
+
+    <div class="email-row read" onclick="showEmail('email1')">
+      <div class="meta">
+        <div class="sender">UOB Bank Alert</div>
+        <div class="time">Yesterday</div>
+      </div>
+      <div class="subject">UOB Account Security Warning — Device Registered</div>
+      <div class="preview">Device registration successful — unrecognized device detected on your profile...</div>
+    </div>
+
+    <div class="email-row read" onclick="showEmail('email1')">
+      <div class="meta">
+        <div class="sender">OCBC Digital Banking</div>
+        <div class="time">Yesterday</div>
+      </div>
+      <div class="subject">Action Required: OCBC Digital Token Activation</div>
+      <div class="preview">Your digital token has expired. FaceID verification update needed to continue...</div>
+    </div>
+
+    <div class="email-row read" onclick="showEmail('email1')">
+      <div class="meta">
+        <div class="sender">Lottery Results SG</div>
+        <div class="time">Mon</div>
+      </div>
+      <div class="subject">Claim Your Prize — Lottery Notification Inside</div>
+      <div class="preview">You have been selected. Change password immediately to secure your winnings...</div>
+    </div>
+
+    <div class="email-row read" onclick="showEmail('email1')">
+      <div class="meta">
+        <div class="sender">POSB Online Services</div>
+        <div class="time">Mon</div>
+      </div>
+      <div class="subject">POSB Digibank Access Locked — Urgent</div>
+      <div class="preview">Anti-fraud system update confirmation required. One-time PIN bypass attempt detected...</div>
+    </div>
+
+    <div class="email-row read" onclick="showEmail('email1')">
+      <div class="meta">
+        <div class="sender">CPF Board</div>
+        <div class="time">Sun</div>
+      </div>
+      <div class="subject">Secured Message — Overdue Invoice Attachment PDF</div>
+      <div class="preview">Please login to view secured message attached. Login required to process refund...</div>
+    </div>
+  </div>
+
+  <!-- EMAIL VIEWER -->
+  <div class="email-viewer">
+
+    <!-- TABS -->
+    <div class="email-tabs">
+      <div class="email-tab active" onclick="showEmail('email1')">📧 DBS Security</div>
+      <div class="email-tab" onclick="showEmail('email2')">📧 IRAS Refund</div>
+      <div class="email-tab" onclick="showEmail('email3')">📧 SingPost</div>
+    </div>
+
+    <!-- EMAIL 1: DBS Phishing -->
+    <div class="email-panel active" id="email1">
+      <div class="email-subject-line">⚠️ Unauthorized Transaction Alert — Security Action Required</div>
+      <div class="email-meta">
+        <div class="sender-avatar red">D</div>
+        <div class="meta-text">
+          <div class="name">DBS Security Team <span style="font-weight:400;color:#5f6368;">&lt;security-noreply@dbs-sg-alert.net&gt;</span></div>
+          <div class="address">via mailserver-09.sg-notify.co</div>
+          <div class="to">to: me, undisclosed-recipients</div>
+        </div>
+        <div class="meta-right">Today, 10:42 AM</div>
+      </div>
+
+      <div class="email-body">
+        <p>Dear Valued Customer,</p>
+        <p>Our <strong>anti-fraud system</strong> has detected a <strong>suspicious unauthorized transaction alert</strong> on your account. As part of our ongoing security protocol, an <strong>anti-fraud system update confirmation</strong> is required within <strong>24 hours</strong> to prevent your account from being permanently restricted.</p>
+
+        <div class="official-box">
+          <div class="logo-bar">🔒 DBS BANK — SECURITY NOTIFICATION</div>
+          <div class="ref">Reference: SG-SEC-2025-0061842 &nbsp;|&nbsp; Priority: HIGH</div>
+          <div class="big-text">Unauthorized Transaction Detected</div>
+          <div class="detail">Amount: <strong>SGD 2,488.00</strong> &nbsp;|&nbsp; Merchant: OVERSEAS TRANSFER &nbsp;|&nbsp; Time: 10:31 AM</div>
+          <div class="detail" style="margin-top:6px;">If you did not authorise this transaction, you must <strong>verify identity to avoid immediate suspension</strong> of your account.</div>
+        </div>
+
+        <p>To dispute this charge and restore full access, please complete the following steps:</p>
+        <p><strong>Step 1:</strong> Click the secure verification button below.<br>
+        <strong>Step 2:</strong> Enter your iBanking credentials to confirm your identity.<br>
+        <strong>Step 3:</strong> Provide the <strong>one-time PIN</strong> sent to your registered mobile number.</p>
+
+        <p style="color:#c0392b;font-weight:600;">⚠ Warning: A one-time PIN bypass attempt has been registered from an unrecognized IP address. Failure to verify within 24 hours will result in account suspension.</p>
+
+        <div class="fake-btn red">Verify Identity Now →</div>
+
+        <p>Additionally, our system has detected a <strong>device registration — unrecognized device</strong> was recently added to your profile. If this was not you, your credentials may have been compromised and you should <strong>change password immediately</strong> after completing verification.</p>
+
+        <p>For further assistance, do not reply to this email. Contact our 24/7 fraud hotline at <strong>+65 6878 8888</strong>.</p>
+
+        <div class="divider-tab"></div>
+
+        <p style="font-size:0.78rem; color:#5f6368;">This is an automated security message. DBS Bank Ltd · 12 Marina Boulevard · Singapore 018982. If you believe this message was sent in error, please disregard it. To unsubscribe from security alerts, please log in and update your notification preferences.</p>
+      </div>
+    </div>
+
+    <!-- EMAIL 2: IRAS Phishing -->
+    <div class="email-panel" id="email2">
+      <div class="email-subject-line">IRAS Tax Refund Confirmation — SGD 847.00 Approved</div>
+      <div class="email-meta">
+        <div class="sender-avatar blue">I</div>
+        <div class="meta-text">
+          <div class="name">Inland Revenue Authority of Singapore <span style="font-weight:400;color:#5f6368;">&lt;refund@iras-gov-sg.info&gt;</span></div>
+          <div class="address">via smtp-relay.iras-notifications.org</div>
+          <div class="to">to: taxpayer, undisclosed-recipients</div>
+        </div>
+        <div class="meta-right">Today, 9:14 AM</div>
+      </div>
+
+      <div class="email-body">
+        <p>Dear Taxpayer,</p>
+        <p>We are pleased to inform you that following a review of your income tax assessment for Year of Assessment 2024, the Inland Revenue Authority of Singapore has approved a <strong>tax refund of SGD 847.00</strong>.</p>
+        <p>To receive your refund, an <strong>IRAS tax refund confirmation</strong> is required. Please also complete a <strong>CPF payout verification</strong> so that we can cross-reference your CPF records before disbursing funds to your registered bank account.</p>
+
+        <div class="official-box">
+          <div class="logo-bar">🏛 INLAND REVENUE AUTHORITY OF SINGAPORE</div>
+          <div class="ref">Tax Reference: S8XXXXXX-D &nbsp;|&nbsp; Assessment Year: 2024</div>
+          <div class="big-text">Refund Amount: SGD 847.00</div>
+          <div class="detail">Status: <span style="color:#188038;font-weight:600;">APPROVED — Awaiting Verification</span></div>
+          <div class="detail" style="margin-top:6px;">Please complete the <strong>CPF payout verification link</strong> process to confirm your bank account details. Refund will be processed within 3–5 business days upon successful verification.</div>
+        </div>
+
+        <p>As part of our <strong>anti-fraud system update</strong>, we require taxpayers to re-confirm their details before any refund disbursement. This is in line with MAS guidelines to prevent fraudulent claims.</p>
+
+        <p>You will need to provide:</p>
+        <p>• Your full NRIC number<br>
+        • Singpass login credentials<br>
+        • A <strong>secured message with attached login</strong> confirmation<br>
+        • Bank account details for direct credit</p>
+
+        <div class="fake-btn green">Complete CPF Verification →</div>
+
+        <p>Please note that this refund offer will expire in <strong>48 hours</strong>. Unclaimed refunds will be forfeited and cannot be reprocessed. To proceed, click the button above or call our helpline at <strong>1800-356-8300</strong>.</p>
+
+        <p>Note: If you receive a prompt requesting a <strong>FaceID verification update</strong>, this is a standard security measure introduced in 2025 for all government digital transactions.</p>
+
+        <div class="divider-tab"></div>
+        <p style="font-size:0.78rem; color:#5f6368;">Inland Revenue Authority of Singapore · 55 Newton Road · Singapore 307987. This message contains a <strong>secured message — attached login</strong> confirmation for your records. Please do not reply directly to this email.</p>
+      </div>
+    </div>
+
+    <!-- EMAIL 3: SingPost Phishing -->
+    <div class="email-panel" id="email3">
+      <div class="email-subject-line">📦 Singapore Post: Delivery Update Required — Parcel On Hold</div>
+      <div class="email-meta">
+        <div class="sender-avatar" style="background:#e67e22;">S</div>
+        <div class="meta-text">
+          <div class="name">SingPost Delivery Notifications <span style="font-weight:400;color:#5f6368;">&lt;delivery@singpost-tracking.net&gt;</span></div>
+          <div class="address">via parcel-notify.sgp-delivery.co</div>
+          <div class="to">to: me</div>
+        </div>
+        <div class="meta-right">Today, 8:57 AM</div>
+      </div>
+
+      <div class="email-body">
+        <p>Dear Customer,</p>
+        <p>We attempted to deliver your parcel today but were unable to complete the delivery due to an outstanding customs clearance fee. Your <strong>Singapore Post delivery update</strong> is required to release the item.</p>
+
+        <div class="official-box">
+          <div class="logo-bar">📮 SINGAPORE POST — PARCEL NOTIFICATION</div>
+          <div class="ref">Tracking No: SP-SG-2025-9941773 &nbsp;|&nbsp; Origin: CN &nbsp;|&nbsp; Status: ON HOLD</div>
+          <div class="big-text">Delivery Fee Outstanding: SGD 3.85</div>
+          <div class="detail">Your item has been held at our Paya Lebar Processing Centre pending payment. To release, an <strong>advance payment for priority delivery</strong> is required before 11:59 PM today.</div>
+        </div>
+
+        <p>To ensure same-day re-delivery, please complete the payment using <strong>PayNow transfer to secure your delivery slot</strong>. Processing time is approximately 15 minutes after payment confirmation.</p>
+
+        <p>Alternatively, if you would prefer to collect the item in person, a <strong>cash deposit required for viewing and collection</strong> applies at our service counter. Please bring a valid photo ID.</p>
+
+        <p>Payment options accepted:</p>
+        <p>• PayNow (UEN: 198900093C)<br>
+        • Credit/Debit card via our secure portal<br>
+        • Cash at any SingPost branch</p>
+
+        <div class="fake-btn">Pay SGD 3.85 to Release Parcel →</div>
+
+        <p>Please note: parcels not claimed within <strong>5 working days</strong> will be returned to sender. If this is an international shipment, return shipping charges may apply and will be billed to the recipient.</p>
+
+        <p>For queries, please quote your tracking number <strong>SP-SG-2025-9941773</strong> and contact us at <strong>1605</strong> (Mon–Fri, 8am–6pm).</p>
+
+        <div class="divider-tab"></div>
+        <p style="font-size:0.78rem; color:#5f6368;">Singapore Post Pte Ltd · 10 Eunos Road 8 · Singapore 408600. This is an automated notification. Please do not reply to this email. Unsubscribe from delivery alerts by updating your SingPost account preferences.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function showEmail(id) {
+    document.querySelectorAll('.email-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.email-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const map = { email1: 0, email2: 1, email3: 2 };
+    document.querySelectorAll('.email-tab')[map[id]].classList.add('active');
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
